@@ -1,0 +1,222 @@
+{
+  "zuul_version": "3.19.0-1.el7",
+  "trigger_event_queue": {
+    "length": 0
+  },
+  "result_event_queue": {
+    "length": 0
+  },
+  "management_event_queue": {
+    "length": 0
+  },
+  "last_reconfigured": 1595009796000,
+  "pipelines": [
+    {
+      "name": "check",
+      "description": "Newly uploaded patchsets enter this pipeline to receive an\ninitial +/-1 Verified vote.\n",
+      "change_queues": [
+        {
+          "name": "software-factory/sfinfo-haskell",
+          "heads": [
+            [
+              {
+                "active": true,
+                "live": false,
+                "url": "https://softwarefactory-project.io/r/18955",
+                "ref": "refs/changes/55/18955/3",
+                "id": "18955,3",
+                "item_ahead": null,
+                "items_behind": [
+                  "18957,2"
+                ],
+                "failing_reasons": [],
+                "zuul_ref": "Z2210a470948c418b93f0dc19eb804a0b",
+                "project": "software-factory/gerrit-haskell",
+                "project_canonical": "softwarefactory-project.io/software-factory/gerrit-haskell",
+                "enqueue_time": 1595014956841,
+                "jobs": [],
+                "owner": {
+                  "name": "Tristan de Cacqueray",
+                  "email": "tdecacqu@redhat.com",
+                  "username": "TristanCacqueray"
+                },
+                "remaining_time": null
+              },
+              {
+                "active": true,
+                "live": false,
+                "url": "https://softwarefactory-project.io/r/18957",
+                "ref": "refs/changes/57/18957/2",
+                "id": "18957,2",
+                "item_ahead": "18955,3",
+                "items_behind": [
+                  "18877,2"
+                ],
+                "failing_reasons": [],
+                "zuul_ref": "Z9303da8a5cb14880ab43a75fbf290cb3",
+                "project": "software-factory/gerrit-haskell",
+                "project_canonical": "softwarefactory-project.io/software-factory/gerrit-haskell",
+                "enqueue_time": 1595014956841,
+                "jobs": [],
+                "owner": {
+                  "name": "Tristan de Cacqueray",
+                  "email": "tdecacqu@redhat.com",
+                  "username": "TristanCacqueray"
+                },
+                "remaining_time": null
+              },
+              {
+                "active": true,
+                "live": false,
+                "url": "https://softwarefactory-project.io/r/18877",
+                "ref": "refs/changes/77/18877/2",
+                "id": "18877,2",
+                "item_ahead": "18957,2",
+                "items_behind": [
+                  "18960,2"
+                ],
+                "failing_reasons": [],
+                "zuul_ref": "Z348f40c661ea419d93d7c41c93149702",
+                "project": "software-factory/podman-haskell",
+                "project_canonical": "softwarefactory-project.io/software-factory/podman-haskell",
+                "enqueue_time": 1595014956842,
+                "jobs": [],
+                "owner": {
+                  "name": "Tristan de Cacqueray",
+                  "email": "tdecacqu@redhat.com",
+                  "username": "TristanCacqueray"
+                },
+                "remaining_time": null
+              },
+              {
+                "active": true,
+                "live": true,
+                "url": "https://softwarefactory-project.io/r/18960",
+                "ref": "refs/changes/60/18960/2",
+                "id": "18960,2",
+                "item_ahead": "18877,2",
+                "items_behind": [],
+                "failing_reasons": [],
+                "zuul_ref": "Z45d80c3299b2410fa8b98c093b04d0e8",
+                "project": "software-factory/sfinfo-haskell",
+                "project_canonical": "softwarefactory-project.io/software-factory/sfinfo-haskell",
+                "enqueue_time": 1595014956843,
+                "jobs": [
+                  {
+                    "name": "linters",
+                    "dependencies": [],
+                    "elapsed_time": 4654,
+                    "remaining_time": 62846,
+                    "url": "stream/a5460a59705f485aa3e3ae279411e08d?logfile=console.log",
+                    "finger_url": null,
+                    "report_url": "linters",
+                    "result": null,
+                    "voting": true,
+                    "uuid": "a5460a59705f485aa3e3ae279411e08d",
+                    "execute_time": 1595014960.5013387,
+                    "start_time": 1595014960.556152,
+                    "end_time": null,
+                    "estimated_time": 67.5,
+                    "pipeline": "check",
+                    "canceled": false,
+                    "paused": false,
+                    "retry": false,
+                    "tries": 1,
+                    "queued": true,
+                    "node_labels": [],
+                    "node_name": null,
+                    "worker": {
+                      "name": "ze07.softwarefactory-project.io",
+                      "hostname": "ze07.softwarefactory-project.io"
+                    }
+                  },
+                  {
+                    "name": "haskell-stack-test",
+                    "dependencies": [],
+                    "elapsed_time": 4538,
+                    "remaining_time": 80462,
+                    "url": "stream/d2d74a3769d847bb8b52e98ab5c7c2a6?logfile=console.log",
+                    "finger_url": null,
+                    "report_url": "haskell-stack-test",
+                    "result": null,
+                    "voting": true,
+                    "uuid": "d2d74a3769d847bb8b52e98ab5c7c2a6",
+                    "execute_time": 1595014960.5694344,
+                    "start_time": 1595014960.6725166,
+                    "end_time": null,
+                    "estimated_time": 85.0,
+                    "pipeline": "check",
+                    "canceled": false,
+                    "paused": false,
+                    "retry": false,
+                    "tries": 1,
+                    "queued": true,
+                    "node_labels": [],
+                    "node_name": null,
+                    "worker": {
+                      "name": "ze04.softwarefactory-project.io",
+                      "hostname": "ze04.softwarefactory-project.io"
+                    }
+                  },
+                  {
+                    "name": "hlint",
+                    "dependencies": [],
+                    "elapsed_time": null,
+                    "remaining_time": null,
+                    "url": null,
+                    "finger_url": null,
+                    "report_url": null,
+                    "result": null,
+                    "voting": true,
+                    "uuid": null,
+                    "execute_time": null,
+                    "start_time": null,
+                    "end_time": null,
+                    "estimated_time": null,
+                    "pipeline": null,
+                    "canceled": null,
+                    "paused": null,
+                    "retry": null,
+                    "tries": 0,
+                    "queued": true,
+                    "node_labels": [],
+                    "node_name": null,
+                    "worker": null
+                  }
+                ],
+                "owner": {
+                  "name": "Tristan de Cacqueray",
+                  "email": "tdecacqu@redhat.com",
+                  "username": "TristanCacqueray"
+                },
+                "remaining_time": null
+              }
+            ]
+          ],
+          "window": 0
+        }
+      ]
+    },
+    {
+      "name": "check",
+      "description": "Newly uploaded patchsets enter this pipeline to receive an\ninitial +/-1 Verified vote.\n",
+      "change_queues": []
+    },
+    {
+      "name": "gate",
+      "description": "Changes that have been approved by core developers are enqueued\nin order in this pipeline, and if they pass tests, will be\nmerged.\n",
+      "change_queues": [
+        {
+          "name": "config",
+          "heads": [],
+          "window": 77
+        }
+      ]
+    },
+    {
+      "name": "post",
+      "description": "This pipeline runs jobs that operate after each change is merged.",
+      "change_queues": []
+    }
+  ]
+}
