@@ -4,12 +4,15 @@
 
 -- | The zuul status data type
 module Zuul.Status
-  ( Job (..),
+  ( -- * Status data types
+    Job (..),
     Change (..),
     Changes (..),
     ChangeQueue (..),
     Pipeline (..),
     Status (..),
+
+    -- * Convenient functions
     pipelineChanges,
     liveChanges,
     changeJobUuid,
@@ -25,8 +28,6 @@ import qualified Data.Text as T
 import GHC.Generics (Generic)
 import Prelude hiding (id)
 
--- pipelineChangeQueue -> change_queue
---
 zuulParseJSON :: String -> Options
 zuulParseJSON prefix = defaultOptions {fieldLabelModifier = recordToJson}
   where
@@ -96,7 +97,16 @@ data Status
 instance FromJSON Status where
   parseJSON = genericParseJSON $ zuulParseJSON "status"
 
-pipelineChanges :: Text -> Maybe Text -> Status -> Maybe [Change]
+-- | Get the change from a pipeline
+pipelineChanges ::
+  -- | The pipeline name
+  Text ->
+  -- | An optional queue name
+  Maybe Text ->
+  -- | The status record
+  Status ->
+  -- | Returns an optional list of changes
+  Maybe [Change]
 pipelineChanges name queueName status =
   case filter (\c -> pipelineName c == name) (statusPipelines status) of
     [pipeline] -> Just $ processPipeline pipeline
@@ -114,9 +124,11 @@ pipelineChanges name queueName status =
     processChanges :: Changes -> [Change]
     processChanges (Changes changes) = changes
 
+-- | Filter the change that are live and active
 liveChanges :: [Change] -> [Change]
 liveChanges = filter (\c -> changeLive c && changeActive c)
 
+-- | Extract the job uuids from a list of change
 changeJobUuid :: [Change] -> [Text]
 changeJobUuid = concatMap go
   where

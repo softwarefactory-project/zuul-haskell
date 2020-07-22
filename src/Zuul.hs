@@ -1,8 +1,14 @@
 -- | This module contains the zuul REST client
 module Zuul
-  ( ZuulClient (baseUrl),
+  ( -- * Client
+    ZuulClient (baseUrl),
     withClient,
+
+    -- * Api
     getStatus,
+
+    -- * Main data types
+    Zuul.Status (..),
   )
 where
 
@@ -12,15 +18,24 @@ import qualified Data.Text as T
 import Data.Text (Text, unpack)
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
-import Zuul.Status
+import qualified Zuul.Status as Zuul
 
+-- | The ZuulClient record, use 'withClient' to create
 data ZuulClient
   = ZuulClient
-      { baseUrl :: Text,
+      { -- | the base url
+        baseUrl :: Text,
         manager :: Manager
       }
 
-withClient :: Text -> (ZuulClient -> IO ()) -> IO ()
+-- | Create the 'ZuulClient'
+withClient ::
+  -- | The zuul api url
+  Text ->
+  -- | The callback
+  (ZuulClient -> IO ()) ->
+  -- | withClient performs the IO
+  IO ()
 withClient url callBack =
   do
     manager <- newManager tlsManagerSettings
@@ -28,7 +43,11 @@ withClient url callBack =
   where
     baseUrl = T.dropWhileEnd (== '/') url <> "/"
 
-zuulGet :: (FromJSON a) => Text -> ZuulClient -> IO a
+zuulGet ::
+  (FromJSON a) =>
+  Text ->
+  ZuulClient ->
+  IO a
 zuulGet path ZuulClient {..} =
   do
     initRequest <- parseUrlThrow (unpack $ baseUrl <> path)
@@ -38,5 +57,6 @@ zuulGet path ZuulClient {..} =
       Left err -> error $ "Decoding of " <> show (responseBody response) <> " failed with: " <> err
       Right a -> pure a
 
-getStatus :: ZuulClient -> IO Status
+-- | Read the status
+getStatus :: ZuulClient -> IO Zuul.Status
 getStatus = zuulGet "status"

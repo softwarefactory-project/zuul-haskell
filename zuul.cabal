@@ -1,10 +1,12 @@
 cabal-version:       2.4
 name:                zuul
 version:             0.0.0.0
-synopsis:            A zuul client
+synopsis:            A zuul client library
 description:
-    See README for more info.
-    See README.md for more details.
+    Zuul is a client library to interface with https://zuul-ci.org.
+    .
+    Use this library to query and decode zuul-web REST API.
+    .
 license:             Apache-2.0
 license-file:        LICENSE
 author:              Software Factory Dev
