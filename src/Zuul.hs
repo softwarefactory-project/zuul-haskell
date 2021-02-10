@@ -5,28 +5,40 @@ module Zuul
     withClient,
 
     -- * Api
+    getProjectConfig,
+    getProjects,
     getStatus,
+    getTenants,
 
     -- * Main data types
+    Zuul.Nodeset (..),
+    Zuul.ProjectConfig (..),
+    Zuul.Project (..),
     Zuul.Status (..),
+    Zuul.SourceContext (..),
+    Zuul.Tenant (..),
   )
 where
 
 import Data.Aeson (FromJSON, decode, eitherDecode)
 import Data.Maybe (fromJust)
-import qualified Data.Text as T
 import Data.Text (Text, unpack)
+import qualified Data.Text as T
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
+import qualified Zuul.Nodeset as Zuul
+import qualified Zuul.Project as Zuul
+import qualified Zuul.ProjectConfig as Zuul
+import qualified Zuul.SourceContext as Zuul
 import qualified Zuul.Status as Zuul
+import qualified Zuul.Tenant as Zuul
 
 -- | The ZuulClient record, use 'withClient' to create
-data ZuulClient
-  = ZuulClient
-      { -- | the base url
-        baseUrl :: Text,
-        manager :: Manager
-      }
+data ZuulClient = ZuulClient
+  { -- | the base url
+    baseUrl :: Text,
+    manager :: Manager
+  }
 
 -- | Create the 'ZuulClient'
 withClient ::
@@ -60,3 +72,12 @@ zuulGet path ZuulClient {..} =
 -- | Read the status
 getStatus :: ZuulClient -> IO Zuul.Status
 getStatus = zuulGet "status"
+
+getTenants :: ZuulClient -> IO [Zuul.Tenant]
+getTenants = zuulGet "tenants"
+
+getProjects :: ZuulClient -> IO [Zuul.Project]
+getProjects = zuulGet "projects"
+
+getProjectConfig :: ZuulClient -> Text -> IO Zuul.ProjectConfig
+getProjectConfig client project = zuulGet ("project/" <> project) client
