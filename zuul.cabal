@@ -50,7 +50,12 @@ library
   import:              common-options
   hs-source-dirs:      src
   exposed-modules:     Zuul
+                     , Zuul.Project
+                     , Zuul.ProjectConfig
+                     , Zuul.SourceContext
+                     , Zuul.Nodeset
                      , Zuul.Status
+                     , Zuul.Tenant
 
 executable zuul-cli
   import:              common-options
