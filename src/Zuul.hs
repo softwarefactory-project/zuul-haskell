@@ -6,12 +6,16 @@ module Zuul
     onTenant,
 
     -- * Api
+    getJobConfig,
+    getJobs,
     getProjectConfig,
     getProjects,
     getStatus,
     getTenants,
 
     -- * Main data types
+    Zuul.Job.Job (..),
+    Zuul.JobConfig (..),
     Zuul.Node (..),
     Zuul.Nodeset (..),
     Zuul.ProjectPipelineJob (..),
@@ -31,6 +35,8 @@ import Data.Text (Text, unpack)
 import qualified Data.Text as T
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
+import qualified Zuul.Job
+import qualified Zuul.JobConfig as Zuul
 import qualified Zuul.Nodeset as Zuul
 import qualified Zuul.Project as Zuul
 import qualified Zuul.ProjectConfig as Zuul
@@ -62,7 +68,7 @@ withClient url callBack =
 
 -- | Update a 'ZuulClient' to work on a tenant
 onTenant :: ZuulClient -> Text -> ZuulClient
-onTenant client tenant = client {baseUrl = baseUrl client <> "/tenant/" <> tenant <> "/"}
+onTenant client tenant = client {baseUrl = baseUrl client <> "tenant/" <> tenant <> "/"}
 
 zuulGet ::
   (FromJSON a) =>
@@ -90,3 +96,9 @@ getProjects = zuulGet "projects"
 
 getProjectConfig :: ZuulClient -> Text -> IO Zuul.ProjectConfig
 getProjectConfig client project = zuulGet ("project/" <> project) client
+
+getJobs :: ZuulClient -> IO [Zuul.Job.Job]
+getJobs = zuulGet "jobs"
+
+getJobConfig :: ZuulClient -> Text -> IO [Zuul.JobConfig]
+getJobConfig client job = zuulGet ("job/" <> job) client
