@@ -62,6 +62,12 @@ executable zuul-cli
   hs-source-dirs:      app
   main-is:             Main.hs
   build-depends:       zuul
+                     , containers
+                     , managed
+                     , filepath
+                     , directory
+                     , text
+                     , xdg-basedir
   ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
