@@ -1,4 +1,9 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Main (main) where
 
@@ -11,6 +16,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as Text
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Encoding (decodeUtf8)
+import Options.Generic
 import System.Directory (createDirectoryIfMissing, doesFileExist)
 import System.Environment (getArgs)
 import System.Environment.XDG.BaseDir (getUserCacheDir)
@@ -21,14 +27,16 @@ import qualified Zuul.Status
 -- | An helper function to cache http query
 withCache ::
   (FromJSON a, ToJSON a) =>
+  ZuulClient ->
   -- | The query IO
-  IO a ->
+  (ZuulClient -> IO a) ->
   -- | The name of the cache
   Text ->
   IO a
-withCache action cacheName = do
+withCache client action cacheName = do
   baseCache <- getUserCacheDir "zuul-haskell"
-  let cachePath = baseCache <> "/" <> unpack cacheName <> ".json"
+  let basePath = T.replace "https://" "" (T.replace "http://" "" (baseUrl client))
+  let cachePath = baseCache <> "/" <> unpack basePath <> unpack cacheName <> ".json"
   cached <- doesFileExist cachePath
   if cached
     then do
@@ -39,23 +47,27 @@ withCache action cacheName = do
         Right x -> pure x
     else do
       createDirectoryIfMissing True (fst (splitFileName cachePath))
-      value <- action
+      value <- action client
       putStrLn ("Writting cache: " <> cachePath)
       encodeFile cachePath value
       pure value
 
 -- | Get the list of tenant names
 getTenantNames :: ZuulClient -> IO [Text]
-getTenantNames client = fmap (fmap tenantName) (getTenants client `withCache` "tenants")
+getTenantNames client = fmap (fmap tenantName) (withCache client getTenants "tenants")
 
 -- | Get the list of project names
 getProjectNames :: Text -> ZuulClient -> IO [Text]
-getProjectNames tenant client = fmap (fmap projectCanonicalName) (getProjects client `withCache` (tenant <> "/projects"))
+getProjectNames tenant client =
+  fmap (fmap projectCanonicalName) (withCache client getProjects (tenant <> "/projects"))
 
 -- | Get the list of job names
 getJobNames :: Text -> ZuulClient -> IO [Text]
-getJobNames tenant client = fmap (fmap jobName) (getJobs client `withCache` (tenant <> "/jobs"))
+getJobNames tenant client = fmap (fmap jobName) (withCache client getJobs (tenant <> "/jobs"))
 
+----------------------------------------------------------------------------------------------------
+-- Label usages
+----------------------------------------------------------------------------------------------------
 type LabelName = Text
 
 data LabelUsage = LabelUsage
@@ -85,7 +97,7 @@ nodesetToLabel tenant job sc nodeset = nodeToLabel <$> nodesetNodes nodeset
 -- | Get LabelUsage of a project
 getProjectLabel :: ZuulClient -> Text -> Text -> IO [(LabelName, [LabelUsage])]
 getProjectLabel client tenant project = do
-  projectConfig <- getProjectConfig client project `withCache` (tenant <> "/project/" <> project)
+  projectConfig <- withCache client (`getProjectConfig` project) (tenant <> "/project/" <> project)
   let jobs :: [ProjectPipelineJob]
       -- this penetrates the project config structure to get all the job in a flat list
       jobs = mconcat $ mconcat $ fmap ppJobs $ mconcat $ fmap ppcPipelines (projectConfigPipelines projectConfig)
@@ -99,7 +111,7 @@ getProjectLabel client tenant project = do
 -- | Get LabelUsage of a job
 getJobLabel :: ZuulClient -> Text -> Text -> IO [(LabelName, [LabelUsage])]
 getJobLabel client tenant job = do
-  jobConfig <- getJobConfig client job `withCache` (tenant <> "/job/" <> job)
+  jobConfig <- withCache client (`getJobConfig` job) (tenant <> "/job/" <> job)
   pure $ mconcat $ map jobConfigToLabel jobConfig
   where
     jobConfigToLabel :: JobConfig -> [(LabelName, [LabelUsage])]
@@ -135,16 +147,38 @@ printNodepoolLabels json url tenant = withClient url $ \client -> do
     ppr :: (LabelName, [LabelUsage]) -> [Text]
     ppr (name, xs) = map (\lu -> name <> " " <> toStrict (encodeToLazyText lu)) xs
 
+----------------------------------------------------------------------------------------------------
+-- Live Changes
+----------------------------------------------------------------------------------------------------
+printLiveChanges :: Text -> Text -> Maybe Text -> IO ()
+printLiveChanges url pipeline queue = withClient url $ \client -> do
+  status <- getStatus client
+  case Zuul.Status.pipelineChanges pipeline queue status of
+    Just changes -> print (map Zuul.Status.changeProject (Zuul.Status.liveChanges changes))
+    Nothing -> putStrLn "No pipeline found :("
+
+----------------------------------------------------------------------------------------------------
+-- Zuul CLI
+----------------------------------------------------------------------------------------------------
+data ZuulCli w
+  = NodepoolLabels
+      { url :: w ::: Text <?> "Zuul API url",
+        json :: w ::: Bool <?> "Output JSON",
+        tenant :: w ::: Maybe Text <?> "A tenant filter"
+      }
+  | LiveChanges
+      { url :: w ::: Text <?> "Zuul API url",
+        pipeline :: w ::: Text <?> "Pipeline name",
+        queue :: w ::: Maybe Text <?> "Queue name"
+      }
+  deriving (Generic)
+
+instance ParseRecord (ZuulCli Wrapped) where
+  parseRecord = parseRecordWithModifiers lispCaseModifiers
+
 main :: IO ()
 main = do
-  args <- getArgs
-  case map T.pack args of
-    [url, "nodepool-label"] -> printNodepoolLabels False url Nothing
-    [url, "nodepool-label", tenant] -> printNodepoolLabels False url (Just tenant)
-    [url, "live-changes", pipeline, queue] ->
-      withClient url $ \client -> do
-        status <- getStatus client
-        case Zuul.Status.pipelineChanges pipeline (Just queue) status of
-          Just changes -> print (map Zuul.Status.changeProject (Zuul.Status.liveChanges changes))
-          Nothing -> putStrLn "No pipeline found :("
-    _ -> putStrLn "usage: zuul-cli url pipeline queue"
+  args <- unwrapRecord "Zuul stats client"
+  case args of
+    NodepoolLabels {..} -> printNodepoolLabels json url tenant
+    LiveChanges {..} -> printLiveChanges url pipeline queue
