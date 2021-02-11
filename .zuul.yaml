@@ -1,13 +1,11 @@
 - project:
     check: &jobs
       jobs:
-        - haskell-stack-test:
-            vars:
-              lts_version: lts-16.5
+        - cabal-test:
             nodeset:
               nodes:
                 - name: container
-                  label: pod-haskell-lts-16
+                  label: zuul-worker-haskell
         - hlint:
             nodeset:
               nodes:

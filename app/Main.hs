@@ -1,4 +1,9 @@
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Main (main) where
 
@@ -11,6 +16,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as Text
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Encoding (decodeUtf8)
+import Options.Generic
 import System.Directory (createDirectoryIfMissing, doesFileExist)
 import System.Environment (getArgs)
 import System.Environment.XDG.BaseDir (getUserCacheDir)
@@ -56,6 +62,9 @@ getProjectNames tenant client = fmap (fmap projectName) (getProjects client `wit
 getJobNames :: Text -> ZuulClient -> IO [Text]
 getJobNames tenant client = fmap (fmap jobName) (getJobs client `withCache` (tenant <> "/jobs"))
 
+----------------------------------------------------------------------------------------------------
+-- Label usages
+----------------------------------------------------------------------------------------------------
 type LabelName = Text
 
 data LabelUsage = LabelUsage
@@ -135,16 +144,38 @@ printNodepoolLabels json url tenant = withClient url $ \client -> do
     ppr :: (LabelName, [LabelUsage]) -> [Text]
     ppr (name, xs) = map (\lu -> name <> " " <> toStrict (encodeToLazyText lu)) xs
 
+----------------------------------------------------------------------------------------------------
+-- Live Changes
+----------------------------------------------------------------------------------------------------
+printLiveChanges :: Text -> Text -> Maybe Text -> IO ()
+printLiveChanges url pipeline queue = withClient url $ \client -> do
+  status <- getStatus client
+  case Zuul.Status.pipelineChanges pipeline queue status of
+    Just changes -> print (map Zuul.Status.changeProject (Zuul.Status.liveChanges changes))
+    Nothing -> putStrLn "No pipeline found :("
+
+----------------------------------------------------------------------------------------------------
+-- Zuul CLI
+----------------------------------------------------------------------------------------------------
+data ZuulCli w
+  = NodepoolLabels
+      { url :: w ::: Text <?> "Zuul API url",
+        json :: w ::: Bool <?> "Output JSON",
+        tenant :: w ::: Maybe Text <?> "A tenant filter"
+      }
+  | LiveChanges
+      { url :: w ::: Text <?> "Zuul API url",
+        pipeline :: w ::: Text <?> "Pipeline name",
+        queue :: w ::: Maybe Text <?> "Queue name"
+      }
+  deriving (Generic)
+
+instance ParseRecord (ZuulCli Wrapped) where
+  parseRecord = parseRecordWithModifiers lispCaseModifiers
+
 main :: IO ()
 main = do
-  args <- getArgs
-  case map T.pack args of
-    [url, "nodepool-label"] -> printNodepoolLabels False url Nothing
-    [url, "nodepool-label", tenant] -> printNodepoolLabels False url (Just tenant)
-    [url, "live-changes", pipeline, queue] ->
-      withClient url $ \client -> do
-        status <- getStatus client
-        case Zuul.Status.pipelineChanges pipeline (Just queue) status of
-          Just changes -> print (map Zuul.Status.changeProject (Zuul.Status.liveChanges changes))
-          Nothing -> putStrLn "No pipeline found :("
-    _ -> putStrLn "usage: zuul-cli url pipeline queue"
+  args <- unwrapRecord "Zuul stats client"
+  case args of
+    NodepoolLabels {..} -> printNodepoolLabels json url tenant
+    LiveChanges {..} -> printLiveChanges url pipeline queue
