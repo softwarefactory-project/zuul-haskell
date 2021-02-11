@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
-module Zuul.ProjectConfig (ProjectConfig (..)) where
+module Zuul.ProjectConfig (ProjectPipeline (..), ProjectPipelineJob (..), ProjectPipelineConfig (..), ProjectConfig (..)) where
 
 import Data.Aeson (FromJSON (..), ToJSON (..), Value (..), object, (.:), (.:?), (.=))
 import Data.Aeson.Types (prependFailure, typeMismatch)

@@ -3,6 +3,7 @@ module Zuul
   ( -- * Client
     ZuulClient (baseUrl),
     withClient,
+    onTenant,
 
     -- * Api
     getProjectConfig,
@@ -11,7 +12,11 @@ module Zuul
     getTenants,
 
     -- * Main data types
+    Zuul.Node (..),
     Zuul.Nodeset (..),
+    Zuul.ProjectPipelineJob (..),
+    Zuul.ProjectPipelineConfig (..),
+    Zuul.ProjectPipeline (..),
     Zuul.ProjectConfig (..),
     Zuul.Project (..),
     Zuul.Status (..),
@@ -54,6 +59,10 @@ withClient url callBack =
     callBack (ZuulClient {..})
   where
     baseUrl = T.dropWhileEnd (== '/') url <> "/"
+
+-- | Update a 'ZuulClient' to work on a tenant
+onTenant :: ZuulClient -> Text -> ZuulClient
+onTenant client tenant = client {baseUrl = baseUrl client <> "/tenant/" <> tenant <> "/"}
 
 zuulGet ::
   (FromJSON a) =>
