@@ -1,6 +1,6 @@
 cabal-version:       2.4
 name:                zuul
-version:             0.0.0.0
+version:             0.0.1.0
 synopsis:            A zuul client library
 description:
     Zuul is a client library to interface with https://zuul-ci.org.
@@ -18,8 +18,8 @@ extra-doc-files:     README.md
 tested-with:         GHC == 8.6.5
 
 common common-options
-  build-depends:       base
-                     , aeson
+  build-depends:       base                   >= 4.11.0.0 && < 5
+                     , aeson                  >= 1.0.0.0  && < 1.6
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities
@@ -32,7 +32,6 @@ common common-options
     ghc-options:       -fhide-source-paths
   if impl(ghc >= 8.4)
     ghc-options:       -Wmissing-export-lists
-                       -Wpartial-fields
   if impl(ghc >= 8.10)
     ghc-options:       -Wunused-packages
 
@@ -43,8 +42,8 @@ common common-options
 
 library
   import:              common-options
-  build-depends:       http-client
-                     , http-client-tls
+  build-depends:       http-client            >= 0.5.0    && < 0.8
+                     , http-client-tls        >= 0.2.0    && < 0.4
                      , text
   hs-source-dirs:      src
   exposed-modules:     Zuul
@@ -61,13 +60,14 @@ executable zuul-cli
   import:              common-options
   hs-source-dirs:      app
   main-is:             Main.hs
-  build-depends:       zuul
-                     , aeson-pretty
-                     , containers
-                     , filepath
-                     , directory
-                     , text
-                     , xdg-basedir
+  build-depends:       aeson-pretty           < 0.9
+                     , containers             >= 0.5.8.0  && < 0.7
+                     , directory              >= 1.3.0.0  && < 1.4
+                     , filepath               >= 1.4      && < 1.5
+                     , optparse-generic       < 1.5.0
+                     , text                   >= 0.11.1.0 && < 1.3
+                     , xdg-basedir            < 0.3.0
+                     , zuul
   ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
@@ -77,10 +77,10 @@ test-suite zuul-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
-  build-depends:       zuul
-                     , bytestring
-                     , tasty
-                     , tasty-hunit
+  build-depends:       bytestring                 < 0.11
+                     , tasty                      >= 0.11.2   && < 1.5
+                     , tasty-hunit                >= 0.10     && < 0.11
+                     , zuul
   ghc-options:         -threaded
                        -rtsopts
                        -with-rtsopts=-N
