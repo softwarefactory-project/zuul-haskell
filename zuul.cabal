@@ -19,12 +19,7 @@ tested-with:         GHC == 8.6.5
 
 common common-options
   build-depends:       base
-                     , bytestring
                      , aeson
-                     , http-client
-                     , http-client-tls
-                     , text
-
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities
@@ -48,8 +43,13 @@ common common-options
 
 library
   import:              common-options
+  build-depends:       http-client
+                     , http-client-tls
+                     , text
   hs-source-dirs:      src
   exposed-modules:     Zuul
+                     , Zuul.Job
+                     , Zuul.JobConfig
                      , Zuul.Project
                      , Zuul.ProjectConfig
                      , Zuul.SourceContext
@@ -62,8 +62,8 @@ executable zuul-cli
   hs-source-dirs:      app
   main-is:             Main.hs
   build-depends:       zuul
+                     , aeson-pretty
                      , containers
-                     , managed
                      , filepath
                      , directory
                      , text
@@ -78,6 +78,7 @@ test-suite zuul-test
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       zuul
+                     , bytestring
                      , tasty
                      , tasty-hunit
   ghc-options:         -threaded
