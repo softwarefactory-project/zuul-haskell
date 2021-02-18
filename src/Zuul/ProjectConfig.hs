@@ -1,11 +1,18 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
-module Zuul.ProjectConfig (ProjectPipeline (..), ProjectPipelineJob (..), ProjectPipelineConfig (..), ProjectConfig (..)) where
+module Zuul.ProjectConfig
+  ( ProjectPipeline (..),
+    ProjectPipelineJob (..),
+    ProjectPipelineConfig (..),
+    ProjectConfig (..),
+  )
+where
 
-import Data.Aeson (FromJSON (..), ToJSON (..), Value (..), object, (.:), (.:?), (.=))
-import Data.Aeson.Types (prependFailure, typeMismatch)
+import Data.Aeson (FromJSON (..), ToJSON (..))
 import Data.Text (Text)
+import GHC.Generics (Generic)
+import Zuul.Aeson (zuulParseJSON, zuulToJSON)
 import Zuul.Nodeset (Nodeset)
 import Zuul.SourceContext (SourceContext)
 
@@ -14,72 +21,37 @@ data ProjectPipelineJob = ProjectPipelineJob
     ppjSourceContext :: SourceContext,
     ppjNodeset :: Maybe Nodeset
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic)
 
 instance ToJSON ProjectPipelineJob where
-  toJSON ProjectPipelineJob {..} =
-    object
-      [ "name" .= ppjName,
-        "source_context" .= ppjSourceContext,
-        "nodeset" .= ppjNodeset
-      ]
+  toJSON = zuulToJSON "ppj"
 
 instance FromJSON ProjectPipelineJob where
-  parseJSON (Object v) = do
-    ppjName <- v .: "name"
-    ppjSourceContext <- v .: "source_context"
-    ppjNodeset <- v .:? "nodeset"
-    pure $ ProjectPipelineJob {..}
-  parseJSON invalid =
-    prependFailure
-      "parsing ProjectPipelineJob failed, "
-      (typeMismatch "Object" invalid)
+  parseJSON = zuulParseJSON "ppj"
 
 data ProjectPipeline = ProjectPipeline
   { ppName :: Text,
     ppJobs :: [[ProjectPipelineJob]]
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic)
 
 instance ToJSON ProjectPipeline where
-  toJSON ProjectPipeline {..} =
-    object
-      [ "name" .= ppName,
-        "jobs" .= ppJobs
-      ]
+  toJSON = zuulToJSON "pp"
 
 instance FromJSON ProjectPipeline where
-  parseJSON (Object v) = do
-    ppName <- v .: "name"
-    ppJobs <- v .: "jobs"
-    pure $ ProjectPipeline {..}
-  parseJSON invalid =
-    prependFailure
-      "parsing ProjectPipeline failed, "
-      (typeMismatch "Object" invalid)
+  parseJSON = zuulParseJSON "pp"
 
 data ProjectPipelineConfig = ProjectPipelineConfig
   { ppcDefaultBranch :: Maybe Text,
     ppcPipelines :: [ProjectPipeline]
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic)
 
 instance ToJSON ProjectPipelineConfig where
-  toJSON ProjectPipelineConfig {..} =
-    object
-      [ "default_branch" .= ppcDefaultBranch,
-        "pipelines" .= ppcPipelines
-      ]
+  toJSON = zuulToJSON "ppc"
 
 instance FromJSON ProjectPipelineConfig where
-  parseJSON (Object v) = do
-    ppcDefaultBranch <- v .:? "default_branch"
-    ppcPipelines <- v .: "pipelines"
-    pure $ ProjectPipelineConfig {..}
-  parseJSON invalid =
-    prependFailure
-      "parsing ProjectPipelineConfig failed, "
-      (typeMismatch "Object" invalid)
+  parseJSON = zuulParseJSON "ppc"
 
 data ProjectConfig = ProjectConfig
   { projectConfigName :: Text,
@@ -87,25 +59,10 @@ data ProjectConfig = ProjectConfig
     projectConfigConnectionName :: Text,
     projectConfigPipelines :: [ProjectPipelineConfig]
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic)
 
 instance ToJSON ProjectConfig where
-  toJSON ProjectConfig {..} =
-    object
-      [ "name" .= projectConfigName,
-        "canonical_name" .= projectConfigCanonicalName,
-        "connection_name" .= projectConfigConnectionName,
-        "configs" .= projectConfigPipelines
-      ]
+  toJSON = zuulToJSON "projectConfig"
 
 instance FromJSON ProjectConfig where
-  parseJSON (Object v) = do
-    projectConfigName <- v .: "name"
-    projectConfigCanonicalName <- v .: "canonical_name"
-    projectConfigConnectionName <- v .: "connection_name"
-    projectConfigPipelines <- v .: "configs"
-    pure $ ProjectConfig {..}
-  parseJSON invalid =
-    prependFailure
-      "parsing ProjectConfig failed, "
-      (typeMismatch "Object" invalid)
+  parseJSON = zuulParseJSON "projectConfig"

@@ -1,0 +1,28 @@
+[
+    {
+        "name": "base",
+        "variants": [
+            {
+                "parent": "base-minimal"
+            }
+        ]
+    },
+    {
+        "name": "cabal-test",
+        "description": "Run cabal test for a Haskell project.",
+        "variants": [
+            {
+                "parent": "base"
+            }
+        ]
+    },
+    {
+        "name": "dhall-diff",
+        "description": "Ensure that generated configuration files are idempotent.",
+        "variants": [
+            {
+                "parent": "base"
+            }
+        ]
+    }
+]

@@ -21,33 +21,24 @@ module Zuul.Status
 where
 
 import Control.Monad (guard)
-import Data.Aeson (FromJSON, Options (fieldLabelModifier), defaultOptions, genericParseJSON, parseJSON)
-import Data.Char (isUpper, toLower)
+import Data.Aeson (FromJSON (..), ToJSON (..))
 import Data.Maybe (fromJust, isJust)
 import Data.Text (Text)
 import GHC.Generics (Generic)
-import Prelude hiding (id)
-
-zuulParseJSON :: String -> Options
-zuulParseJSON prefix = defaultOptions {fieldLabelModifier = recordToJson}
-  where
-    recordToJson = updateCase . drop (length prefix)
-    updateCase [] = []
-    updateCase (x : xs) = toLower x : updateCase' xs
-    updateCase' [] = []
-    updateCase' (x : xs)
-      | isUpper x = '_' : toLower x : updateCase' xs
-      | otherwise = x : updateCase' xs
+import Zuul.Aeson (zuulParseJSON, zuulToJSON)
 
 data JobStatus = JobStatus
   { jobName :: Text,
     jobUuid :: Maybe Text,
     jobResult :: Maybe Text
   }
-  deriving (Show, Generic)
+  deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON JobStatus where
-  parseJSON = genericParseJSON $ zuulParseJSON "job"
+  parseJSON = zuulParseJSON "job"
+
+instance ToJSON JobStatus where
+  toJSON = zuulToJSON "job"
 
 data Change = Change
   { changeId :: Maybe Text,
@@ -57,40 +48,52 @@ data Change = Change
     changeActive :: Bool,
     changeJobs :: [JobStatus]
   }
-  deriving (Show, Generic)
+  deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON Change where
-  parseJSON = genericParseJSON $ zuulParseJSON "change"
+  parseJSON = zuulParseJSON "change"
+
+instance ToJSON Change where
+  toJSON = zuulToJSON "change"
 
 newtype Changes = Changes [Change]
-  deriving (Show, Generic, FromJSON)
+  deriving (Show, Eq, Ord, Generic, FromJSON, ToJSON)
 
 data ChangeQueue = ChangeQueue
   { changeQueueName :: Text,
     changeQueueHeads :: [Changes]
   }
-  deriving (Show, Generic)
+  deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON ChangeQueue where
-  parseJSON = genericParseJSON $ zuulParseJSON "changeQueue"
+  parseJSON = zuulParseJSON "changeQueue"
+
+instance ToJSON ChangeQueue where
+  toJSON = zuulToJSON "changeQueue"
 
 data Pipeline = Pipeline
   { pipelineName :: Text,
     pipelineChangeQueues :: [ChangeQueue]
   }
-  deriving (Show, Generic)
+  deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON Pipeline where
-  parseJSON = genericParseJSON $ zuulParseJSON "pipeline"
+  parseJSON = zuulParseJSON "pipeline"
+
+instance ToJSON Pipeline where
+  toJSON = zuulToJSON "pipeline"
 
 data Status = Status
   { statusZuulVersion :: Text,
     statusPipelines :: [Pipeline]
   }
-  deriving (Show, Generic)
+  deriving (Show, Eq, Ord, Generic)
 
 instance FromJSON Status where
-  parseJSON = genericParseJSON $ zuulParseJSON "status"
+  parseJSON = zuulParseJSON "status"
+
+instance ToJSON Status where
+  toJSON = zuulToJSON "status"
 
 -- | Get the change from a pipeline
 pipelineChanges ::
