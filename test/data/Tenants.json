@@ -1,0 +1,47 @@
+[
+    {
+        "name": "ansible",
+        "projects": 5,
+        "queue": 1
+    },
+    {
+        "name": "containers-update",
+        "projects": 7,
+        "queue": 0
+    },
+    {
+        "name": "fedora",
+        "projects": 521,
+        "queue": 3
+    },
+    {
+        "name": "local",
+        "projects": 902,
+        "queue": 3
+    },
+    {
+        "name": "opendev.org",
+        "projects": 2,
+        "queue": 0
+    },
+    {
+        "name": "ovirt",
+        "projects": 5,
+        "queue": 0
+    },
+    {
+        "name": "ovirt-staging",
+        "projects": 5,
+        "queue": 0
+    },
+    {
+        "name": "packit-service",
+        "projects": 14,
+        "queue": 0
+    },
+    {
+        "name": "rdoproject.org",
+        "projects": 1095,
+        "queue": 22
+    }
+]
