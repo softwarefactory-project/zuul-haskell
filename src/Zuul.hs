@@ -14,7 +14,7 @@ module Zuul
     getTenants,
 
     -- * Main data types
-    Zuul.Job.Job (..),
+    Zuul.Job (..),
     Zuul.JobConfig (..),
     Zuul.Node (..),
     Zuul.Nodeset (..),
@@ -35,7 +35,7 @@ import Data.Text (Text, unpack)
 import qualified Data.Text as T
 import Network.HTTP.Client
 import Network.HTTP.Client.TLS (tlsManagerSettings)
-import qualified Zuul.Job
+import qualified Zuul.Job as Zuul
 import qualified Zuul.JobConfig as Zuul
 import qualified Zuul.Nodeset as Zuul
 import qualified Zuul.Project as Zuul
@@ -97,7 +97,7 @@ getProjects = zuulGet "projects"
 getProjectConfig :: ZuulClient -> Text -> IO Zuul.ProjectConfig
 getProjectConfig client project = zuulGet ("project/" <> project) client
 
-getJobs :: ZuulClient -> IO [Zuul.Job.Job]
+getJobs :: ZuulClient -> IO [Zuul.Job]
 getJobs = zuulGet "jobs"
 
 getJobConfig :: ZuulClient -> Text -> IO [Zuul.JobConfig]

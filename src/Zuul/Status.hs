@@ -5,7 +5,7 @@
 -- | The zuul status data type
 module Zuul.Status
   ( -- * Status data types
-    Job (..),
+    JobStatus (..),
     Change (..),
     Changes (..),
     ChangeQueue (..),
@@ -39,26 +39,24 @@ zuulParseJSON prefix = defaultOptions {fieldLabelModifier = recordToJson}
       | isUpper x = '_' : toLower x : updateCase' xs
       | otherwise = x : updateCase' xs
 
-data Job
-  = Job
-      { jobName :: Text,
-        jobUuid :: Maybe Text,
-        jobResult :: Maybe Text
-      }
+data JobStatus = JobStatus
+  { jobName :: Text,
+    jobUuid :: Maybe Text,
+    jobResult :: Maybe Text
+  }
   deriving (Show, Generic)
 
-instance FromJSON Job where
+instance FromJSON JobStatus where
   parseJSON = genericParseJSON $ zuulParseJSON "job"
 
-data Change
-  = Change
-      { changeId :: Maybe Text,
-        changeRef :: Text,
-        changeProject :: Text,
-        changeLive :: Bool,
-        changeActive :: Bool,
-        changeJobs :: [Job]
-      }
+data Change = Change
+  { changeId :: Maybe Text,
+    changeRef :: Text,
+    changeProject :: Text,
+    changeLive :: Bool,
+    changeActive :: Bool,
+    changeJobs :: [JobStatus]
+  }
   deriving (Show, Generic)
 
 instance FromJSON Change where
@@ -67,31 +65,28 @@ instance FromJSON Change where
 newtype Changes = Changes [Change]
   deriving (Show, Generic, FromJSON)
 
-data ChangeQueue
-  = ChangeQueue
-      { changeQueueName :: Text,
-        changeQueueHeads :: [Changes]
-      }
+data ChangeQueue = ChangeQueue
+  { changeQueueName :: Text,
+    changeQueueHeads :: [Changes]
+  }
   deriving (Show, Generic)
 
 instance FromJSON ChangeQueue where
   parseJSON = genericParseJSON $ zuulParseJSON "changeQueue"
 
-data Pipeline
-  = Pipeline
-      { pipelineName :: Text,
-        pipelineChangeQueues :: [ChangeQueue]
-      }
+data Pipeline = Pipeline
+  { pipelineName :: Text,
+    pipelineChangeQueues :: [ChangeQueue]
+  }
   deriving (Show, Generic)
 
 instance FromJSON Pipeline where
   parseJSON = genericParseJSON $ zuulParseJSON "pipeline"
 
-data Status
-  = Status
-      { statusZuulVersion :: Text,
-        statusPipelines :: [Pipeline]
-      }
+data Status = Status
+  { statusZuulVersion :: Text,
+    statusPipelines :: [Pipeline]
+  }
   deriving (Show, Generic)
 
 instance FromJSON Status where
@@ -134,7 +129,7 @@ changeJobUuid = concatMap go
   where
     go :: Change -> [Text]
     go Change {..} = getUuids changeJobs
-    getUuids :: [Job] -> [Text]
+    getUuids :: [JobStatus] -> [Text]
     getUuids jobs = do
       job <- jobs
       guard $ isJust (jobUuid job)
