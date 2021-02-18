@@ -52,6 +52,7 @@ library
                      , text                   >= 0.11.1.0 && < 1.3
   hs-source-dirs:      src
   exposed-modules:     Zuul
+                     , Zuul.Aeson
                      , Zuul.Job
                      , Zuul.JobConfig
                      , Zuul.Project

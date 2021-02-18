@@ -1,31 +1,22 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
+-- | The zuul job data type
 module Zuul.Job (Job (..)) where
 
-import Data.Aeson (FromJSON (..), ToJSON (..), Value (..), object, (.:), (.:?), (.=))
-import Data.Aeson.Types (prependFailure, typeMismatch)
+import Data.Aeson (FromJSON (..), ToJSON (..))
 import Data.Text (Text)
+import GHC.Generics (Generic)
+import Zuul.Aeson (zuulParseJSON, zuulToJSON)
 
 data Job = Job
   { jobName :: Text,
     jobDescription :: Maybe Text
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic)
 
 instance ToJSON Job where
-  toJSON Job {..} =
-    object
-      [ "name" .= jobName,
-        "description" .= jobDescription
-      ]
+  toJSON = zuulToJSON "job"
 
 instance FromJSON Job where
-  parseJSON (Object v) = do
-    jobName <- v .: "name"
-    jobDescription <- v .:? "description"
-    pure $ Job {..}
-  parseJSON invalid =
-    prependFailure
-      "parsing Job failed, "
-      (typeMismatch "Object" invalid)
+  parseJSON = zuulParseJSON "job"

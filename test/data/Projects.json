@@ -1,0 +1,20 @@
+[
+    {
+        "name": "ansible/ansible",
+        "connection_name": "github.com",
+        "canonical_name": "github.com/ansible/ansible",
+        "type": "untrusted"
+    },
+    {
+        "name": "ansible/awx",
+        "connection_name": "github.com",
+        "canonical_name": "github.com/ansible/awx",
+        "type": "untrusted"
+    },
+    {
+        "name": "ansible/zuul-config",
+        "connection_name": "github.com",
+        "canonical_name": "github.com/ansible/zuul-config",
+        "type": "config"
+    }
+]

@@ -1,0 +1,86 @@
+[
+    {
+        "name": "cabal-test",
+        "branches": [],
+        "override_checkout": null,
+        "files": [],
+        "irrelevant_files": [],
+        "variant_description": "",
+        "source_context": {
+            "project": "zuul/zuul-jobs",
+            "branch": "master",
+            "path": "zuul.d/haskell-jobs.yaml"
+        },
+        "description": "Run cabal test for a Haskell project.\n\nResponds to these variables:\n\n.. zuul:jobvar:: cabal_target\n\n   The cabal target(s) to test.\n\n.. zuul:jobvar:: ghc_version\n\n   Use the specified ghc version (``latest`` picks the latest).\n",
+        "required_projects": [],
+        "semaphore": null,
+        "variables": {
+            "ghc_version": "latest"
+        },
+        "extra_variables": {},
+        "host_variables": {},
+        "group_variables": {},
+        "final": false,
+        "abstract": false,
+        "protected": null,
+        "voting": true,
+        "timeout": null,
+        "tags": [],
+        "provides": [],
+        "requires": [],
+        "dependencies": [],
+        "attempts": 3,
+        "roles": [
+            {
+                "target_name": "zuul-jobs",
+                "type": "zuul",
+                "project_canonical_name": "opendev.org/zuul/zuul-jobs",
+                "implicit": true
+            }
+        ],
+        "run": [
+            {
+                "path": "playbooks/haskell/cabal.yaml",
+                "roles": [
+                    {
+                        "target_name": "zuul-jobs",
+                        "type": "zuul",
+                        "project_canonical_name": "opendev.org/zuul/zuul-jobs",
+                        "implicit": true
+                    }
+                ],
+                "secrets": [],
+                "source_context": {
+                    "project": "zuul/zuul-jobs",
+                    "branch": "master",
+                    "path": "zuul.d/haskell-jobs.yaml"
+                }
+            }
+        ],
+        "pre_run": [
+            {
+                "path": "playbooks/haskell/pre.yaml",
+                "roles": [
+                    {
+                        "target_name": "zuul-jobs",
+                        "type": "zuul",
+                        "project_canonical_name": "opendev.org/zuul/zuul-jobs",
+                        "implicit": true
+                    }
+                ],
+                "secrets": [],
+                "source_context": {
+                    "project": "zuul/zuul-jobs",
+                    "branch": "master",
+                    "path": "zuul.d/haskell-jobs.yaml"
+                }
+            }
+        ],
+        "post_run": [],
+        "cleanup_run": [],
+        "post_review": null,
+        "match_on_config_updates": true,
+        "parent": "base",
+        "ansible_version": null
+    }
+]

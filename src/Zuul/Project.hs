@@ -1,14 +1,24 @@
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
-module Zuul.Project (Project (..)) where
+module Zuul.Project (Project (..), ProjectType (..)) where
 
-import Data.Aeson (FromJSON (..), ToJSON (..), Value (..), object, (.:), (.=))
+import Data.Aeson (FromJSON (..), ToJSON (..), Value (String))
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import Data.Text (Text)
+import GHC.Generics (Generic)
+import Zuul.Aeson (zuulParseJSON, zuulToJSON)
 
 data ProjectType = ProjectConfig | ProjectUntrusted
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic)
+
+data Project = Project
+  { projectName :: Text,
+    projectType :: ProjectType,
+    projectCanonicalName :: Text,
+    projectConnectionName :: Text
+  }
+  deriving (Show, Eq, Ord, Generic)
 
 instance ToJSON ProjectType where
   toJSON v = case v of
@@ -25,31 +35,8 @@ instance FromJSON ProjectType where
       "parsing ProjectType failed, "
       (typeMismatch "String" invalid)
 
-data Project = Project
-  { projectName :: Text,
-    projectType :: ProjectType,
-    projectCanonicalName :: Text,
-    projectConnectionName :: Text
-  }
-  deriving (Show, Eq, Ord)
-
 instance ToJSON Project where
-  toJSON Project {..} =
-    object
-      [ "name" .= projectName,
-        "type" .= projectType,
-        "canonical_name" .= projectCanonicalName,
-        "connection_name" .= projectConnectionName
-      ]
+  toJSON = zuulToJSON "project"
 
 instance FromJSON Project where
-  parseJSON (Object v) = do
-    projectName <- v .: "name"
-    projectType <- v .: "type"
-    projectCanonicalName <- v .: "canonical_name"
-    projectConnectionName <- v .: "connection_name"
-    pure $ Project {..}
-  parseJSON invalid =
-    prependFailure
-      "parsing Project failed, "
-      (typeMismatch "Object" invalid)
+  parseJSON = zuulParseJSON "project"
