@@ -1,6 +1,6 @@
 FROM quay.io/software-factory/zuul-worker-haskell as builder
 
-COPY README.md LICENSE zuul.cabal /tmp/src
+COPY README.md CHANGELOG.md LICENSE zuul.cabal /tmp/src
 COPY app/ /tmp/src/app
 COPY test/ /tmp/src/test/
 COPY src/ /tmp/src/src/

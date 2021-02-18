@@ -1,8 +1,16 @@
 # zuul
 
-A zuul client library.
+[![Hackage](https://img.shields.io/hackage/v/zuul.svg)](https://hackage.haskell.org/package/zuul)
 
-Main [documentation](https://docs.softwarefactory-project.io/zuul-haskell/)
+A client library for [zuul](https://zuul-ci.org).
+
+## Features
+
+- JSON decoder for API endpoints.
+- HTTP client helper functions.
+- Command line utility to compute informations.
+  - live-changes: count the number of change running in a pipeline.
+  - nodepool-labels: get the label used in project pipelines.
 
 
 ## Contribute

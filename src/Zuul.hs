@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
+
 -- | This module contains the zuul REST client
 module Zuul
   ( -- * Client

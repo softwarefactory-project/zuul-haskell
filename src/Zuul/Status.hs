@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 -- | The zuul status data type
 module Zuul.Status
@@ -22,9 +23,8 @@ where
 import Control.Monad (guard)
 import Data.Aeson (FromJSON, Options (fieldLabelModifier), defaultOptions, genericParseJSON, parseJSON)
 import Data.Char (isUpper, toLower)
-import Data.Maybe (fromJust, fromMaybe, isJust)
+import Data.Maybe (fromJust, isJust)
 import Data.Text (Text)
-import qualified Data.Text as T
 import GHC.Generics (Generic)
 import Prelude hiding (id)
 
