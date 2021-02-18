@@ -36,7 +36,7 @@ import Data.Aeson (FromJSON, decode, eitherDecode)
 import Data.Maybe (fromJust)
 import Data.Text (Text, unpack)
 import qualified Data.Text as T
-import Network.HTTP.Client
+import Network.HTTP.Client (Manager, httpLbs, newManager, parseUrlThrow, requestHeaders, responseBody)
 import Network.HTTP.Client.TLS (tlsManagerSettings)
 import qualified Zuul.Job as Zuul
 import qualified Zuul.JobConfig as Zuul

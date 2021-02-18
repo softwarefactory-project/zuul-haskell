@@ -1,35 +1,23 @@
-{-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 
 module Zuul.SourceContext (SourceContext (..)) where
 
-import Data.Aeson (FromJSON (..), ToJSON (..), Value (..), object, (.:), (.=))
+import Data.Aeson (FromJSON (..), ToJSON (..), Value (String))
 import Data.Aeson.Types (prependFailure, typeMismatch)
 import Data.Text (Text)
+import GHC.Generics (Generic)
+import Zuul.Aeson (zuulParseJSON, zuulToJSON)
 
 data SourceContext = SourceContext
   { scBranch :: Text,
     scPath :: Text,
     scProject :: Text
   }
-  deriving (Show, Eq, Ord)
+  deriving (Show, Eq, Ord, Generic)
 
 instance ToJSON SourceContext where
-  toJSON SourceContext {..} =
-    object
-      [ "branch" .= scBranch,
-        "path" .= scPath,
-        "project" .= scProject
-      ]
+  toJSON = zuulToJSON "sc"
 
 instance FromJSON SourceContext where
-  parseJSON (Object v) = do
-    scBranch <- v .: "branch"
-    scPath <- v .: "path"
-    scProject <- v .: "project"
-    pure $ SourceContext {..}
-  parseJSON invalid =
-    prependFailure
-      "parsing SourceContext failed, "
-      (typeMismatch "Object" invalid)
+  parseJSON = zuulParseJSON "sc"
