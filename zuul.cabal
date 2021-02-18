@@ -1,21 +1,29 @@
 cabal-version:       2.4
 name:                zuul
-version:             0.0.1.0
+version:             0.1.0.0
 synopsis:            A zuul client library
 description:
     Zuul is a client library to interface with https://zuul-ci.org.
     .
-    Use this library to query and decode zuul-web REST API.
+    Use this library to query and decode zuul-web API.
     .
+    Use the zuul-cli to compute informations.
+    .
+homepage:            https://github.com/softwarefactory-project/zuul-haskell#readme
+bug-reports:         https://github.com/softwarefactory-project/zuul-haskell/issues
 license:             Apache-2.0
 license-file:        LICENSE
-author:              Software Factory Dev
-maintainer:          Software Factory Dev <softwarefactory-dev@redhat.com>
-copyright:           2020 Red Hat
+author:              Tristan de Cacqueray
+maintainer:          tdecacqu@redhat.com
+copyright:           2021 Red Hat
 category:            Development
 build-type:          Simple
 extra-doc-files:     README.md
-tested-with:         GHC == 8.6.5
+tested-with:         GHC == 8.10.3
+
+source-repository head
+  type:                git
+  location:            https://github.com/softwarefactory-project/zuul-haskell.git
 
 common common-options
   build-depends:       base                   >= 4.11.0.0 && < 5
@@ -26,7 +34,6 @@ common common-options
                        -Wincomplete-uni-patterns
                        -Wincomplete-record-updates
                        -Wredundant-constraints
-                       -- Let's keep unused imports around as documentation purpose
                        -Wno-unused-imports
   if impl(ghc >= 8.2)
     ghc-options:       -fhide-source-paths
@@ -69,7 +76,6 @@ executable zuul-cli
                      , xdg-basedir            < 0.3.0
                      , zuul
   ghc-options:         -threaded
-                       -rtsopts
                        -with-rtsopts=-N
 
 test-suite zuul-test
@@ -81,6 +87,4 @@ test-suite zuul-test
                      , tasty                      >= 0.11.2   && < 1.5
                      , tasty-hunit                >= 0.10     && < 0.11
                      , zuul
-  ghc-options:         -threaded
-                       -rtsopts
-                       -with-rtsopts=-N
+  ghc-options:         -Wall
