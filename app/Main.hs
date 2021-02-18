@@ -100,7 +100,7 @@ getProjectLabel client tenant project = do
   projectConfig <- withCache client (`getProjectConfig` project) (tenant <> "/project/" <> project)
   let jobs :: [ProjectPipelineJob]
       -- this penetrates the project config structure to get all the job in a flat list
-      jobs = mconcat $ mconcat $ fmap ppJobs $ mconcat $ fmap ppcPipelines (projectConfigPipelines projectConfig)
+      jobs = mconcat $ mconcat $ fmap ppJobs $ mconcat $ fmap ppcPipelines (projectConfigConfigs projectConfig)
   pure $ mconcat $ map projectPipelineJobToLabel jobs
   where
     projectPipelineJobToLabel :: ProjectPipelineJob -> [(LabelName, [LabelUsage])]
