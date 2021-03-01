@@ -29,6 +29,7 @@ module Zuul
     Zuul.Status (..),
     Zuul.SourceContext (..),
     Zuul.Tenant (..),
+    Zuul.JobVariables,
   )
 where
 

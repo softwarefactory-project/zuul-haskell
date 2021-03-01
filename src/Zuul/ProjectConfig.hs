@@ -13,13 +13,18 @@ import Data.Aeson (FromJSON (..), ToJSON (..))
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import Zuul.Aeson (zuulParseJSON, zuulToJSON)
+import Zuul.JobConfig (JobVariables)
 import Zuul.Nodeset (Nodeset)
 import Zuul.SourceContext (SourceContext)
 
 data ProjectPipelineJob = ProjectPipelineJob
   { ppjName :: Text,
     ppjSourceContext :: SourceContext,
-    ppjNodeset :: Maybe Nodeset
+    ppjNodeset :: Maybe Nodeset,
+    ppjVariables :: JobVariables,
+    ppjExtraVariables :: JobVariables,
+    ppjHostVariables :: JobVariables,
+    ppjGroupVariables :: JobVariables
   }
   deriving (Show, Eq, Ord, Generic)
 

@@ -4,7 +4,7 @@
 -- | The zuul job data type
 module Zuul.Job (Job (..)) where
 
-import Data.Aeson (FromJSON (..), ToJSON (..))
+import Data.Aeson (FromJSON (..), ToJSON (..), Value)
 import Data.Text (Text)
 import GHC.Generics (Generic)
 import Zuul.Aeson (zuulParseJSON, zuulToJSON)
