@@ -11,7 +11,7 @@ A client library for [zuul](https://zuul-ci.org).
 - Command line utility to compute informations.
   - live-changes: count the number of change running in a pipeline.
   - nodepool-labels: get the label used in project pipelines.
-
+  - job-vars: get the job variables used in project pipelines.
 
 ## Contribute
 
