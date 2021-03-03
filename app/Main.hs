@@ -142,7 +142,7 @@ getProjectJobVars tenant ProjectPipelineJob {..} = VarUsage tenant ppjName ppjSo
 getJobVars :: Text -> JobConfig -> Maybe VarUsage
 getJobVars tenant JobConfig {..} = case jcSourceContext of
   Nothing -> Nothing
-  Just sc -> Just $ VarUsage tenant jcName sc vars
+  Just sc -> Just $ VarUsage tenant jcName sc (filterEmptyVars vars)
   where
     vars =
       [ ("vars", jcVariables),
