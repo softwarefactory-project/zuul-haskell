@@ -1,6 +1,6 @@
 cabal-version:       2.4
 name:                zuul
-version:             0.1.0.0
+version:             0.1.1.0
 synopsis:            A zuul client library
 description:
     Zuul is a client library to interface with https://zuul-ci.org.
@@ -29,7 +29,7 @@ source-repository head
 
 common common-options
   build-depends:       base                   >= 4.11.0.0 && < 5
-                     , aeson                  >= 1.0.0.0  && < 1.6
+                     , aeson                  >= 1.0.0.0  && < 2.1
   ghc-options:         -Wall
                        -Wcompat
                        -Widentities
