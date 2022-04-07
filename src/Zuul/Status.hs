@@ -17,6 +17,8 @@ module Zuul.Status
     pipelineChanges,
     liveChanges,
     changeJobUuid,
+    ChangePipeline (..),
+    runningChanges,
   )
 where
 
@@ -125,6 +127,19 @@ pipelineChanges name queueName status =
 -- | Filter the change that are live and active
 liveChanges :: [Change] -> [Change]
 liveChanges = filter (\c -> changeLive c && changeActive c)
+
+data ChangePipeline = ChangePipeline {cpPipeline :: Text, cpChange :: Change}
+
+-- | Extract the list of running changes with their pipeline name
+runningChanges :: Status -> [ChangePipeline]
+runningChanges status =
+  concatMap processPipeline (statusPipelines status)
+  where
+    processPipeline pipeline =
+      ChangePipeline (pipelineName pipeline)
+        <$> liveChanges (concatMap processQueue (pipelineChangeQueues pipeline))
+    processQueue queue = concatMap processChanges (changeQueueHeads queue)
+    processChanges (Changes changes) = changes
 
 -- | Extract the job uuids from a list of change
 changeJobUuid :: [Change] -> [Text]

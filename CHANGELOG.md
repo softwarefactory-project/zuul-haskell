@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2.0
+
+- Add Status runningChanges helper.
+- Add wait-for-result sub command.
+
 ## 0.1.1.0 (2022-03-31)
 
 - Add variables to JobConfig and ProjectConfig.

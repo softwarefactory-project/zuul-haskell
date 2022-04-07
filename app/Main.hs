@@ -1,12 +1,16 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Main (main) where
 
+import Control.Concurrent (threadDelay)
+import Control.Monad (MonadPlus (mzero))
+import Control.Monad.Fix (fix)
 import Data.Aeson (FromJSON, ToJSON (..), eitherDecodeFileStrict, encodeFile, object, (.=))
 import Data.Aeson.Encode.Pretty (encodePretty)
 import Data.Aeson.Text (encodeToLazyText)
@@ -14,16 +18,19 @@ import qualified Data.List as L
 import qualified Data.Map as M
 import Data.Map.Strict (Map, fromListWith, toList, unionsWith)
 import Data.Maybe (mapMaybe)
-import Data.Text (Text, pack, unpack)
+import Data.Text (Text, breakOn, pack, unpack)
 import qualified Data.Text as T
 import qualified Data.Text.IO as Text
 import Data.Text.Lazy (toStrict)
 import Data.Text.Lazy.Encoding (decodeUtf8)
+import qualified Data.Text.Read
 import Options.Generic
+import System.Clock (Clock (Monotonic), TimeSpec, diffTimeSpec, getTime, toNanoSecs)
 import System.Directory (createDirectoryIfMissing, doesFileExist)
 import System.Environment (getArgs)
 import System.Environment.XDG.BaseDir (getUserCacheDir)
 import System.FilePath.Posix (splitFileName)
+import qualified System.IO
 import Zuul
 import qualified Zuul.Status
 
@@ -237,8 +244,40 @@ printLiveChanges :: Text -> Maybe Text -> ZuulClient -> IO ()
 printLiveChanges pipeline queue client = do
   status <- getStatus client
   case Zuul.Status.pipelineChanges pipeline queue status of
-    Just changes -> print (map Zuul.Status.changeProject (Zuul.Status.liveChanges changes))
     Nothing -> putStrLn "No pipeline found :("
+    Just changes -> print (map Zuul.Status.changeProject (Zuul.Status.liveChanges changes))
+
+waitForResult :: TimeSpec -> Text -> Int -> ZuulClient -> IO ()
+waitForResult start project change client = fix $ \loop -> do
+  status <- getStatus client
+  case changeStatus status of
+    Just e -> putStrLn $ "\n" <> e
+    Nothing -> do
+      now <- getTime Monotonic
+      let elapsed = toNanoSecs $ diffTimeSpec start now
+      putStr $ show (elapsed `div` 1_000_000_000) <> "sec: change is still running...\r"
+      System.IO.hFlush System.IO.stdout
+      threadDelay 10_000_000
+      loop
+  where
+    changeStatus status =
+      let changes = Zuul.Status.cpChange <$> Zuul.Status.runningChanges status
+       in case filter isChange changes of
+            [c]
+              | any jobFailed (Zuul.Status.changeJobs c) -> pure "Change has a failed job, go check it out!"
+              | otherwise -> Nothing
+            [] -> pure "Change is not running"
+            _ -> pure "Multiple change matched?!"
+
+    jobFailed jobStatus = case Zuul.Status.jobResult jobStatus of
+      Just res | res /= "SUCCESS" -> True
+      _ -> False
+
+    isChange c = Zuul.Status.changeProject c == project && isChangeNr (Zuul.Status.changeId c)
+    isChangeNr Nothing = False
+    isChangeNr (Just nr) =
+      let (nrS, _) = Data.Text.breakOn "," nr
+       in Data.Text.Read.decimal nrS == Right (change, "")
 
 ----------------------------------------------------------------------------------------------------
 -- Zuul CLI
@@ -258,6 +297,11 @@ data ZuulCli w
         pipeline :: w ::: Text <?> "Pipeline name",
         queue :: w ::: Maybe Text <?> "Queue name"
       }
+  | WaitForResult
+      { url :: w ::: Text <?> "Zuul API url",
+        project :: w ::: Text <?> "Project name",
+        change :: w ::: Int <?> "Change number"
+      }
   deriving (Generic)
 
 instance ParseRecord (ZuulCli Wrapped) where
@@ -270,3 +314,6 @@ main = do
     NodepoolLabels {..} -> withClient url (printNodepoolLabels json tenant)
     JobVars {..} -> withClient url (printJobVars tenant)
     LiveChanges {..} -> withClient url (printLiveChanges pipeline queue)
+    WaitForResult {..} -> do
+      now <- getTime Monotonic
+      withClient url (waitForResult now project change)
